@@ -1,0 +1,104 @@
+import random
+
+# Define rooms, their connections, and hunger levels
+rooms = {
+    'Foyer': {'east': 'Kitchen', 'south': 'Living Room'},
+    'Kitchen': {'west': 'Foyer', 'south': 'Dining Room'},
+    'Living Room': {'north': 'Foyer', 'east': 'Dining Room'},
+    'Dining Room': {'north': 'Kitchen', 'west': 'Living Room'},
+}
+
+# Define room descriptions
+room_descriptions = {
+    'Foyer': 'You are in the foyer. There is a door to the east and a door to the south.',
+    'Kitchen': 'You are in the kitchen. There is a door to the west and a door to the south.',
+    'Living Room': 'You are in the living room. There is a door to the north and a door to the east.',
+    'Dining Room': 'You are in the dining room. There is a door to the north and a door to the west.',
+}
+
+# Initialize player's inventory
+inventory = []
+
+# Define items in the rooms
+room_items = {
+    'Foyer': [],
+    'Kitchen': ['Knife'],
+    'Living Room': ['Key'],
+    'Dining Room': ['Food Basket'],
+}
+
+# Define puzzles in the rooms
+room_puzzles = {
+    'Foyer': None,
+    'Kitchen': 'You need to cut the rope to proceed.',
+    'Living Room': None,
+    'Dining Room': 'You need a key to unlock the door.',
+}
+
+# Initialize player's starting room
+current_room = 'Foyer'
+
+# Initialize hunger level
+hunger_level = 100
+
+# Game loop
+while True:
+    print("\n" + room_descriptions[current_room])
+    
+    # Display hunger level
+    print(f'Hunger Level: {hunger_level}')
+    
+    # Check if there are items in the current room
+    if room_items[current_room]:
+        print(f"You see: {', '.join(room_items[current_room])}")
+
+    # Check if there's a puzzle in the current room
+    if room_puzzles[current_room]:
+        print(room_puzzles[current_room])
+
+    # Prompt the player for action
+    action = input("What would you like to do? ").lower()
+    
+    # Handle player actions
+    if action == 'quit':
+        print("Thanks for playing! Goodbye.")
+        break
+    elif action == 'inventory':
+        print("Inventory:", ', '.join(inventory))
+    elif 'take' in action:
+        item = action.split(' ')[-1]
+        if item in room_items[current_room]:
+            room_items[current_room].remove(item)
+            inventory.append(item)
+            print(f"You have taken the {item}.")
+        else:
+            print(f"There is no {item} here.")
+    elif 'use' in action:
+        item = action.split(' ')[-1]
+        if item in inventory:
+            if item == 'Knife' and current_room == 'Kitchen':
+                print("You cut the rope and can now proceed.")
+                room_puzzles['Kitchen'] = None
+            elif item == 'Key' and current_room == 'Dining Room':
+                print("You unlock the door and can now proceed.")
+                room_puzzles['Dining Room'] = None
+            elif item == 'Food Basket' and current_room == 'Dining Room':
+                hunger_level += 20
+                inventory.remove('Food Basket')
+                print("You ate from the food basket and feel less hungry.")
+            else:
+                print(f"You can't use the {item} here.")
+        else:
+            print(f"You don't have a {item}.")
+    elif action in rooms[current_room]:
+        current_room = rooms[current_room][action]
+    else:
+        print("Invalid action. Try 'quit', 'inventory', 'take [item]', 'use [item]', or go to a different room.")
+    
+    # Update hunger level
+    hunger_level -= random.randint(5, 10)
+    
+    # Check if the player has eliminated hunger
+    if hunger_level <= 0:
+        print("Congratulations! You have eliminated hunger and achieved Zero Hunger!")
+        break
